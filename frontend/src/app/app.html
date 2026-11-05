@@ -1,0 +1,51 @@
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/students"
+      ><span class="brand-mark">C</span
+      ><span>CAMPUS<span class="brand-subtitle">STUDENT MANAGEMENT</span></span></a
+    >
+    <div class="sidebar-section">WORKSPACE</div>
+    <nav aria-label="Main navigation">
+      <a
+        routerLink="/students"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        ><span aria-hidden="true">◎</span> Students</a
+      ><a routerLink="/courses" routerLinkActive="active"
+        ><span aria-hidden="true">▤</span> Courses</a
+      >
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-note">Small details.<br />Brighter futures.</div>
+      <div class="small opacity-75 mt-3">Student & course workspace</div>
+    </div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar">
+      <span>Academic workspace</span><span class="local-badge">LOCAL EDITION</span>
+    </header>
+    @if (workspace.tabs().length) {
+      <nav class="work-tabs" aria-label="Open work tabs">
+        @for (tab of workspace.tabs(); track tab.key) {
+          <div class="work-tab" routerLinkActive="selected">
+            <a [routerLink]="['/', tab.kind, tab.id ?? 'new']"
+              >{{ tab.title }}{{ tab.form.dirty ? ' •' : '' }}</a
+            ><button
+              type="button"
+              (click)="workspace.close(tab)"
+              [attr.aria-label]="'Close ' + tab.title"
+            >
+              ×
+            </button>
+          </div>
+        }
+      </nav>
+    }
+    <main id="main" tabindex="-1"><router-outlet /></main>
+    <footer>
+      <app-weather />
+      <div class="footer-note">A little structure. A lot of possibility.</div>
+    </footer>
+  </div>
+</div>
