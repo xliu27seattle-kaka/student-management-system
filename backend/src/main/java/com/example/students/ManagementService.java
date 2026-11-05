@@ -26,7 +26,9 @@ public class ManagementService {
   }
 
   public PageView<CourseView> courses(String q, Pageable page) {
-    return PageView.of(courses.search(q, page).map(this::view));
+    var result = courses.search(q, page);
+    var counts = courseCounts(result.getContent().stream().map(c -> c.id).toList());
+    return PageView.of(result.map(c -> view(c, counts.getOrDefault(c.id, 0L))));
   }
 
   public StudentView student(Long id) {
@@ -108,12 +110,16 @@ public class ManagementService {
 
   public List<EnrollmentView> studentCourses(Long id) {
     requireStudent(id);
-    return enrollments.findByStudentIdOrderById(id).stream().map(this::view).toList();
+    var result = enrollments.findByStudentIdOrderById(id);
+    var counts = courseCounts(result.stream().map(e -> e.course.id).distinct().toList());
+    return result.stream()
+        .map(e -> view(e, view(e.course, counts.getOrDefault(e.course.id, 0L))))
+        .toList();
   }
 
   public List<EnrollmentView> courseStudents(Long id) {
-    requireCourse(id);
-    return enrollments.findByCourseIdOrderById(id).stream().map(this::view).toList();
+    var course = view(requireCourse(id));
+    return enrollments.findByCourseIdOrderById(id).stream().map(e -> view(e, course)).toList();
   }
 
   private Student requireStudent(Long id) {
@@ -124,12 +130,27 @@ public class ManagementService {
     return courses.findById(id).orElseThrow(() -> DomainException.missing("Course"));
   }
 
+  private Map<Long, Long> courseCounts(List<Long> ids) {
+    if (ids.isEmpty()) return Map.of();
+    Map<Long, Long> counts = new HashMap<>();
+    for (var count : enrollments.countForCourses(ids))
+      counts.put(count.getCourseId(), count.getTotal());
+    return counts;
+  }
+
   private CourseView view(Course c) {
-    return new CourseView(
-        c.id, c.code, c.name, c.description, c.capacity, enrollments.countByCourseId(c.id));
+    return view(c, enrollments.countByCourseId(c.id));
+  }
+
+  private CourseView view(Course c, long enrolledCount) {
+    return new CourseView(c.id, c.code, c.name, c.description, c.capacity, enrolledCount);
   }
 
   private EnrollmentView view(Enrollment e) {
-    return new EnrollmentView(e.id, StudentView.of(e.student), view(e.course), e.enrolledAt);
+    return view(e, view(e.course));
+  }
+
+  private EnrollmentView view(Enrollment e, CourseView course) {
+    return new EnrollmentView(e.id, StudentView.of(e.student), course, e.enrolledAt);
   }
 }

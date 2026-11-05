@@ -162,4 +162,4 @@ Page numbers start at zero; page size defaults to 10 and is capped at 100. Allow
 
 ## Deliberate scope
 
-This is a local take-home project: no login, authorization, cloud deployment, global state framework, or microservices. Authentication was explicitly excluded. H2 keeps reviewer setup small. Editing uses last successful write wins; enrollment capacity is protected transactionally. Counts are queried per course for simplicity at this scale; a production-sized catalog would use aggregate projections and paginated rosters. External weather is an optional enhancement with independent availability.
+This is a local take-home project: no login, authorization, cloud deployment, global state framework, or microservices. Authentication was explicitly excluded. H2 keeps reviewer setup small. Editing uses last successful write wins; enrollment capacity is protected transactionally. Course lists and student-course lists use batched enrollment counts; course rosters reuse one course view. A production-sized catalog would also paginate rosters. External weather is an optional enhancement with independent availability.

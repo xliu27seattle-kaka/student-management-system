@@ -7,6 +7,17 @@ import org.springframework.data.jpa.repository.*;
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
   long countByCourseId(Long id);
 
+  interface CourseEnrollmentCount {
+    Long getCourseId();
+
+    long getTotal();
+  }
+
+  @Query(
+      "select e.course.id as courseId, count(e) as total from Enrollment e where e.course.id in"
+          + " :courseIds group by e.course.id")
+  List<CourseEnrollmentCount> countForCourses(List<Long> courseIds);
+
   boolean existsByStudentIdAndCourseId(Long studentId, Long courseId);
 
   Optional<Enrollment> findByStudentIdAndCourseId(Long studentId, Long courseId);

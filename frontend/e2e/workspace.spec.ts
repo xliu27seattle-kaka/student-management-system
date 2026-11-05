@@ -351,3 +351,66 @@ test('a manual city choice wins over an earlier pending browser location request
     page.getByRole('heading', { name: 'Seattle, Washington', exact: true }),
   ).toBeVisible();
 });
+
+test('pending create blocks tab and directory navigation until the response completes', async ({
+  page,
+  request,
+}) => {
+  const stamp = Date.now();
+  const existing = await (
+    await request.post('/api/students', {
+      data: { name: 'Existing work tab', email: `existing-tab${stamp}@example.com` },
+    })
+  ).json();
+  let createdId: number | undefined;
+  let releaseResponse!: () => void;
+  let markRequestReceived!: () => void;
+  const responseGate = new Promise<void>((resolve) => {
+    releaseResponse = resolve;
+  });
+  const requestReceived = new Promise<void>((resolve) => {
+    markRequestReceived = resolve;
+  });
+  await page.route('**/api/students', async (route) => {
+    if (route.request().method() !== 'POST') {
+      await route.continue();
+      return;
+    }
+    const response = await route.fetch();
+    createdId = (await response.json()).id;
+    markRequestReceived();
+    await responseGate;
+    await route.fulfill({ response });
+  });
+  try {
+    await page.goto(`/students/${existing.id}`);
+    await expect(page.getByLabel('Full name')).toHaveValue('Existing work tab');
+    await page.getByRole('link', { name: '← All students' }).click();
+    await page.getByRole('link', { name: '+ Add student' }).click();
+    await page.getByLabel('Full name').fill('Pending create');
+    await page.getByRole('textbox', { name: /^Email/ }).fill(`pending${stamp}@example.com`);
+    await page.getByRole('button', { name: 'Create student', exact: true }).click();
+    await requestReceived;
+    await expect(page.getByRole('button', { name: 'Saving…', exact: true })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Close tab', exact: true })).toBeDisabled();
+    await page
+      .getByRole('navigation', { name: 'Open work tabs' })
+      .getByRole('link', { name: 'Existing work tab', exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/students\/new$/);
+    await page
+      .getByRole('navigation', { name: 'Main navigation' })
+      .getByRole('link', { name: 'Students' })
+      .click();
+    await expect(page).toHaveURL(/\/students\/new$/);
+    releaseResponse();
+    await expect(page).toHaveURL(new RegExp(`/students/${createdId}$`));
+    await expect(page.getByLabel('Full name')).toHaveValue('Pending create');
+    await expect(page.getByRole('button', { name: 'Close tab', exact: true })).toBeEnabled();
+    await expect(page.getByRole('button', { name: 'Save changes', exact: true })).toBeDisabled();
+  } finally {
+    releaseResponse();
+    if (createdId !== undefined) await request.delete(`/api/students/${createdId}`);
+    await request.delete(`/api/students/${existing.id}`);
+  }
+});

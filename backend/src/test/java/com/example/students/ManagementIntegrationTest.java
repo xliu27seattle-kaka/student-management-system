@@ -178,4 +178,37 @@ class ManagementIntegrationTest {
         .andExpect(status().isBadRequest());
     assertEquals(0, courses.count());
   }
+
+  @Test
+  void aggregateCountsStayCorrectAcrossDirectoriesEnrollmentsAndWithdrawal() {
+    var ada = student("Ada");
+    var grace = student("Grace");
+    var enrolled = course(20);
+    var empty = service.saveCourse(null, new CourseInput("CS2", "Empty course", "", 20));
+    service.enroll(ada.id(), enrolled.id());
+    service.enroll(grace.id(), enrolled.id());
+    var directory =
+        service.courses("", org.springframework.data.domain.PageRequest.of(0, 10)).content();
+    assertEquals(
+        2,
+        directory.stream()
+            .filter(c -> c.id().equals(enrolled.id()))
+            .findFirst()
+            .orElseThrow()
+            .enrolledCount());
+    assertEquals(
+        0,
+        directory.stream()
+            .filter(c -> c.id().equals(empty.id()))
+            .findFirst()
+            .orElseThrow()
+            .enrolledCount());
+    assertEquals(2, service.studentCourses(ada.id()).getFirst().course().enrolledCount());
+    assertTrue(
+        service.courseStudents(enrolled.id()).stream()
+            .allMatch(e -> e.course().enrolledCount() == 2));
+    service.withdraw(grace.id(), enrolled.id());
+    assertEquals(1, service.studentCourses(ada.id()).getFirst().course().enrolledCount());
+    assertEquals(1, service.courseStudents(enrolled.id()).getFirst().course().enrolledCount());
+  }
 }

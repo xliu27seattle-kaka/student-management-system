@@ -1,15 +1,15 @@
 # Review, corrections, and verification
 
-This document records a self-review of the agreed 48-hour take-home scope. The four perspectives below are review criteria, not independent reviewer approvals or a hiring decision. The earlier simulated “Strong pass” votes have been removed: an assessment should be supported by findings and executed checks.
+This document records the implementing agent's self-review and executed verification. A subsequent panel of four separate review agents has now inspected the project, raised findings, and re-reviewed corrections. Their actual votes, evidence, and remaining delivery conditions are recorded in [Independent agent panel review](PANEL_REVIEW.md). Earlier unsupported simulated votes were removed and are not the basis for the panel results.
 
 ## Panel perspectives
 
-| Perspective               | Review focus                                                                    | Assessment after corrections                                                                                                                                                                                                                                               |
-| ------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CTO                       | Complete workflows, reasonable scope, and reproducible delivery.                | The agreed features are implemented. Docker readiness and a container smoke-test CI job are included; local container execution and remote publication remain unverified.                                                                                                  |
-| Technical recruiter       | A reviewer can understand and run the submission.                               | The README contains course introductions, the stack, actual Java service classes, database tables, Docker installation/start/stop steps, and Playwright commands. GitHub authentication is still needed to publish the commits.                                            |
-| Senior software developer | Data correctness, asynchronous UI behavior, validation, and regression tests.   | The review found and corrected stale-request races, a query-string tab-close defect, missing strict compiler settings, fractional-capacity coercion, and a delayed-location race. Regression tests cover these cases.                                                      |
-| Senior architect          | Clear persistence boundaries, transaction safety, and proportionate complexity. | Spring Data JPA/Hibernate, three business tables, service transactions, database constraints, and course row locks fit the assignment. Per-course count queries, in-memory drafts, last-write-wins edits, and unpaginated rosters remain explicit small-project tradeoffs. |
+| Perspective               | Review focus                                                                    | Assessment after corrections                                                                                                                                                                                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CTO                       | Complete workflows, reasonable scope, and reproducible delivery.                | The agreed features are implemented. Docker readiness and a container smoke-test CI job are included; local container execution and remote publication remain unverified.                                                                                                                        |
+| Technical recruiter       | A reviewer can understand and run the submission.                               | The README contains course introductions, the stack, actual Java service classes, database tables, Docker installation/start/stop steps, and Playwright commands. GitHub authentication is still needed to publish the commits.                                                                  |
+| Senior software developer | Data correctness, asynchronous UI behavior, validation, and regression tests.   | The review found and corrected stale-request races, a query-string tab-close defect, missing strict compiler settings, fractional-capacity coercion, and a delayed-location race. Regression tests cover these cases.                                                                            |
+| Senior architect          | Clear persistence boundaries, transaction safety, and proportionate complexity. | Spring Data JPA/Hibernate, three business tables, service transactions, database constraints, and course row locks fit the assignment. Batched count queries now avoid per-row counts. In-memory drafts, last-write-wins edits, and unpaginated rosters remain explicit small-project tradeoffs. |
 
 ## Findings and corrections
 
@@ -36,11 +36,11 @@ Local verification on November 5, 2026 uses Java 21.0.13 and Node 22.23.4. Resul
 
 | Check                           | Result                                                                                                  |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Maven `verify`                  | **19 tests passed**, executable JAR packaged                                                            |
+| Maven `verify`                  | **22 tests passed**, executable JAR packaged                                                            |
 | Frontend `npm test`             | **13 tests passed**, including controlled asynchronous HTTP regressions                                 |
 | Angular production build        | **Passed** with strict TypeScript and strict templates; approximately 124 kB estimated initial transfer |
 | Playwright source type-check    | **Passed**                                                                                              |
-| Playwright / Chromium           | **10 tests passed** against Spring and in-memory H2                                                     |
+| Playwright / Chromium           | **11 tests passed** against Spring and in-memory H2                                                     |
 | README local links              | **Passed**, local README and development links resolve                                                  |
 | Standalone Compose schema check | **Passed**, Compose 5.7.0 `config --quiet`; no engine required                                          |
 | Official Docker image metadata  | All four selected base tags publish Linux ARM64 and AMD64 images                                        |
@@ -59,4 +59,4 @@ Browser tests use the real Angular app, Spring API, and an isolated in-memory H2
 - Pushes have failed because this machine has no GitHub credentials. Public repository visibility does not mean these source commits have been uploaded.
 - No hosted GitHub Actions result has been observed.
 - Mobile checks use Chromium emulation, not physical iOS/Android devices. Accessibility includes labels, required-field semantics, focus states, keyboard-accessible dialogs, and a skip link; no formal accessibility audit is claimed.
-- No independent hiring-panel review has been received. The project is ready for that review once publication is unblocked; subsequent actual feedback should be recorded with its correction and verification evidence.
+- Four independent review agents have completed code/submission review and re-review. See [the panel report](PANEL_REVIEW.md) for their actual votes and limitations. These are agent reviews, not a real employer hiring decision.

@@ -4,6 +4,8 @@ A full-stack take-home project for managing students, courses, and enrollments. 
 
 ![Course directory](docs/courses-desktop.png)
 
+![Student editor with open work tabs and an enrollment](docs/student-workspace.png)
+
 ## Courses
 
 These original computer science courses are seeded once, each with **20 seats**. Users can add, edit, and delete courses and change capacity. Duplicate enrollment is rejected; capacity cannot be reduced below current enrollment. Deleting a student or course removes its enrollments and preserves records on the other side.
@@ -59,6 +61,13 @@ Flyway creates and versions the schema; Hibernate validates the entity mappings 
 | `enrollments`  | `id`, `student_id`, `course_id`, `enrolled_at`  | Student/course association; each student/course pair is unique. |
 
 The association table supports both “a student's courses” and “a course's students.” IDs are database-generated. Transactions and course row locks prevent overbooking. Flyway also maintains its own `flyway_schema_history` metadata table.
+
+## Choose a startup path
+
+- **Docker:** follow the installation and startup instructions below. This builds Java, Angular, and H2 inside containers.
+- **Local Java / Node:** follow [Run locally](docs/DEVELOPMENT.md#run-locally) using Java 21 and Node 22.22.3+ (22.x). This path has been exercised locally.
+
+Docker schema validation passed; a full container build still requires Docker Engine and has not been executed in this environment.
 
 ## Install Docker
 
@@ -126,4 +135,4 @@ On Windows PowerShell, use `.\mvnw.cmd verify` in place of `./mvnw verify`.
 
 Playwright automatically starts and stops isolated servers on **4201 / 8081** with a fresh **in-memory database**. It does not use the Docker deployment or modify its data. Weather responses are stubbed for reproducibility; the application's CRUD requests use the real backend. Failed tests save screenshots and traces under `frontend/test-results/`.
 
-For non-Docker development, backend/frontend unit tests, and the full REST reference, see [development instructions](docs/DEVELOPMENT.md). See [verification notes](docs/REVIEW.md) for executed checks and limits. Docker configuration is provided; container builds have not been verified in this environment.
+For non-Docker development, backend/frontend unit tests, and the full REST reference, see [development instructions](docs/DEVELOPMENT.md). See [verification notes](docs/REVIEW.md) and the [independent agent panel review](docs/PANEL_REVIEW.md) for executed checks, actual review votes, and remaining delivery conditions. Docker configuration is provided; container builds have not been verified in this environment.
