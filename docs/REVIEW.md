@@ -29,7 +29,7 @@ Verified locally on November 5, 2026 using Java 21.0.13 and Node 22.23.4.
 | Maven `verify`                             | **18 tests passed**, executable JAR packaged                     |
 | Frontend `npm test`                        | **8 tests passed**                                               |
 | Angular production build                   | **Passed**, approximately 124 kB estimated initial transfer      |
-| Playwright / Chromium                      | **6 tests passed** against real Spring and in-memory H2          |
+| Playwright / Chromium                      | **7 tests passed** against real Spring and in-memory H2          |
 | Desktop / 390 px mobile browser inspection | **Passed**, no runtime page errors or horizontal page overflow   |
 | Live `/api/weather` with DC defaults       | **HTTP 200**, current conditions and America/New_York local date |
 | Live `/api/weather/cities?name=Seattle`    | **HTTP 200**, selectable city results                            |
@@ -38,7 +38,7 @@ Verified locally on November 5, 2026 using Java 21.0.13 and Node 22.23.4.
 
 Backend coverage includes validation, missing records, normalized unique emails/codes, paging/search, both enrollment query directions, deletion on either side without deleting the other entity, withdrawal, capacity reduction rollback, duplicate enrollment, simultaneous last-seat enrollment, one-time course seeding, and weather mapping/outages/malformed responses. External HTTP is mocked in backend weather tests.
 
-Browser coverage includes create/update/delete for both entities, field validation, enrollment and withdrawal, independent work-tab drafts, cancel/discard confirmation, delete cancellation, city selection, successful geolocation, denied geolocation, weather outage isolation, mobile layout, paging, sorting, and searching. Browser weather responses are stubbed for deterministic tests; live weather was checked separately.
+Browser coverage includes duplicate-email and capacity-conflict messages from the backend, create/update/delete for both entities, field validation, enrollment and withdrawal, independent work-tab drafts, cancel/discard confirmation, delete cancellation, city selection, successful geolocation, denied geolocation, weather outage isolation, mobile layout, paging, sorting, and searching. Browser weather responses are stubbed for deterministic tests; live weather was checked separately.
 
 ## Remaining verification limits and tradeoffs
 

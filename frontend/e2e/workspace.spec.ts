@@ -223,3 +223,52 @@ test('directory pagination, sorting and search work against server data', async 
     await request.delete(`/api/courses/${course.id}`);
   }
 });
+
+test('UI displays duplicate email and capacity conflict errors from the backend', async ({
+  page,
+  request,
+}) => {
+  const stamp = Date.now();
+  const email = `existing${stamp}@example.com`;
+  const first = await (
+    await request.post('/api/students', { data: { name: 'Existing student', email } })
+  ).json();
+  const second = await (
+    await request.post('/api/students', {
+      data: { name: 'Second student', email: `second${stamp}@example.com` },
+    })
+  ).json();
+  const course = await (
+    await request.post('/api/courses', {
+      data: { code: `C${stamp}`, name: 'Capacity check', description: '', capacity: 2 },
+    })
+  ).json();
+  try {
+    expect((await request.post(`/api/students/${first.id}/courses/${course.id}`)).status()).toBe(
+      201,
+    );
+    expect((await request.post(`/api/students/${second.id}/courses/${course.id}`)).status()).toBe(
+      201,
+    );
+    await page.goto('/students/new');
+    await page.getByLabel('Full name').fill('Duplicate email');
+    await page.getByRole('textbox', { name: /^Email/ }).fill(email);
+    await page.getByRole('button', { name: 'Create student', exact: true }).click();
+    await expect(page.getByRole('alert')).toHaveText('Email is already in use.');
+    await expect(page.getByRole('textbox', { name: /^Email/ })).toHaveValue(email);
+    await page.getByRole('button', { name: 'Close tab', exact: true }).click();
+    await page.getByRole('button', { name: 'Discard changes', exact: true }).click();
+    await expect(page).toHaveURL(/\/students$/);
+    await page.goto(`/courses/${course.id}`);
+    await page.getByLabel('Capacity').fill('1');
+    await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+    await expect(page.getByRole('alert')).toHaveText(
+      'Capacity cannot be lower than current enrollment.',
+    );
+    expect((await (await request.get(`/api/courses/${course.id}`)).json()).capacity).toBe(2);
+  } finally {
+    await request.delete(`/api/courses/${course.id}`);
+    await request.delete(`/api/students/${first.id}`);
+    await request.delete(`/api/students/${second.id}`);
+  }
+});
