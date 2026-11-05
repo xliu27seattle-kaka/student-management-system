@@ -1,7 +1,8 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService, errorMessage } from './api.service';
 import { Location, Weather } from './models';
 
@@ -95,6 +96,8 @@ export function weatherLabel(code: number): string {
 })
 export class WeatherComponent implements OnInit {
   private api = inject(ApiService);
+  private destroy = inject(DestroyRef);
+  private locationRequest = 0;
   weather = signal<Weather | null>(null);
   city = signal('Washington, DC');
   error = signal('');
@@ -111,6 +114,7 @@ export class WeatherComponent implements OnInit {
   label = weatherLabel;
   private request = 0;
   ngOnInit() {
+    this.destroy.onDestroy(() => this.locationRequest++);
     this.load(this.latitude, this.longitude);
   }
   load(latitude: number, longitude: number) {
@@ -120,20 +124,23 @@ export class WeatherComponent implements OnInit {
     this.busy.set(true);
     this.error.set('');
     this.weather.set(null);
-    this.api.weather(latitude, longitude).subscribe({
-      next: (w) => {
-        if (request === this.request) {
-          this.weather.set(w);
-          this.busy.set(false);
-        }
-      },
-      error: (e) => {
-        if (request === this.request) {
-          this.error.set(errorMessage(e));
-          this.busy.set(false);
-        }
-      },
-    });
+    this.api
+      .weather(latitude, longitude)
+      .pipe(takeUntilDestroyed(this.destroy))
+      .subscribe({
+        next: (w) => {
+          if (request === this.request) {
+            this.weather.set(w);
+            this.busy.set(false);
+          }
+        },
+        error: (e) => {
+          if (request === this.request) {
+            this.error.set(errorMessage(e));
+            this.busy.set(false);
+          }
+        },
+      });
   }
   search() {
     if (this.query.trim().length < 2 || this.searching()) return;
@@ -143,13 +150,18 @@ export class WeatherComponent implements OnInit {
     this.cities.set([]);
     this.api
       .cities(this.query.trim())
-      .pipe(finalize(() => this.searching.set(false)))
+      .pipe(
+        finalize(() => this.searching.set(false)),
+        takeUntilDestroyed(this.destroy),
+      )
       .subscribe({
         next: (c) => this.cities.set(c),
         error: (e) => this.searchError.set(errorMessage(e)),
       });
   }
   select(place: Location) {
+    this.locationRequest++;
+    this.locating.set(false);
     this.city.set(`${place.name}, ${place.region || place.country}`);
     this.expanded.set(false);
     this.cities.set([]);
@@ -160,16 +172,19 @@ export class WeatherComponent implements OnInit {
       this.searchError.set('Location is unavailable. Please search for a city.');
       return;
     }
+    const request = ++this.locationRequest;
     this.locating.set(true);
     this.searchError.set('');
     navigator.geolocation.getCurrentPosition(
       (p) => {
+        if (request !== this.locationRequest) return;
         this.locating.set(false);
         this.city.set('Current location');
         this.expanded.set(false);
         this.load(p.coords.latitude, p.coords.longitude);
       },
       () => {
+        if (request !== this.locationRequest) return;
         this.locating.set(false);
         this.searchError.set('Could not access your location. Please search for a city.');
       },

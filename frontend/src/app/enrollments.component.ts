@@ -2,7 +2,7 @@ import { Component, DestroyRef, inject, Input, OnChanges, OnInit, signal } from 
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize, forkJoin } from 'rxjs';
+import { finalize, Subscription } from 'rxjs';
 import { ApiService, errorMessage } from './api.service';
 import { ConfirmService } from './confirm.service';
 import { Course, Enrollment, EntityKind, Page } from './models';
@@ -90,7 +90,11 @@ import { Course, Enrollment, EntityKind, Page } from './models';
                 class="btn btn-sm btn-outline-primary"
                 (click)="enroll(course)"
                 [disabled]="
-                  busy() || enrolled(course.id) || course.enrolledCount >= course.capacity
+                  busy() ||
+                  loading() ||
+                  optionsLoading() ||
+                  enrolled(course.id) ||
+                  course.enrolledCount >= course.capacity
                 "
               >
                 {{
@@ -109,13 +113,13 @@ import { Course, Enrollment, EntityKind, Page } from './models';
         <div class="d-flex justify-content-end gap-2 mt-2">
           <button
             class="btn btn-sm btn-outline-secondary"
-            [disabled]="page === 0 || busy()"
+            [disabled]="page === 0 || busy() || optionsLoading()"
             (click)="move(-1)"
           >
             Previous</button
           ><button
             class="btn btn-sm btn-outline-secondary"
-            [disabled]="page + 1 >= data.totalPages || busy()"
+            [disabled]="page + 1 >= data.totalPages || busy() || optionsLoading()"
             (click)="move(1)"
           >
             Next
@@ -139,10 +143,15 @@ export class EnrollmentsComponent implements OnChanges, OnInit {
   loading = signal(false);
   query = '';
   page = 0;
+  optionsLoading = signal(false);
+  private rosterRequest?: Subscription;
+  private optionsRequest?: Subscription;
   ngOnInit() {
     this.api.changed.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => this.load());
   }
   ngOnChanges() {
+    this.optionsRequest?.unsubscribe();
+    this.optionsLoading.set(false);
     this.rows.set([]);
     this.options.set(null);
     this.page = 0;
@@ -151,10 +160,11 @@ export class EnrollmentsComponent implements OnChanges, OnInit {
     this.load();
   }
   load() {
+    this.rosterRequest?.unsubscribe();
     this.error.set('');
     this.loading.set(true);
     const id = this.id;
-    this.api
+    this.rosterRequest = this.api
       .enrollments(this.kind, id)
       .pipe(takeUntilDestroyed(this.destroy))
       .subscribe({
@@ -174,9 +184,14 @@ export class EnrollmentsComponent implements OnChanges, OnInit {
     if (this.kind === 'students') this.loadOptions();
   }
   loadOptions() {
-    this.api
+    this.optionsRequest?.unsubscribe();
+    this.optionsLoading.set(true);
+    this.optionsRequest = this.api
       .list<Course>('courses', this.query.trim(), this.page, 'code')
-      .pipe(takeUntilDestroyed(this.destroy))
+      .pipe(
+        finalize(() => this.optionsLoading.set(false)),
+        takeUntilDestroyed(this.destroy),
+      )
       .subscribe({
         next: (c) => this.options.set(c),
         error: (e) => this.error.set(errorMessage(e)),

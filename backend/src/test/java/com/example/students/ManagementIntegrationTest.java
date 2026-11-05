@@ -118,10 +118,14 @@ class ManagementIntegrationTest {
   void failedCapacityChangeRollsBack() {
     var s = student("Ada");
     var c = course(20);
+    var second = student("Grace");
     service.enroll(s.id(), c.id());
-    assertThrows(
-        DomainException.class,
-        () -> service.saveCourse(c.id(), new CourseInput("CS1", "Changed", "Changed", 0)));
+    service.enroll(second.id(), c.id());
+    var error =
+        assertThrows(
+            DomainException.class,
+            () -> service.saveCourse(c.id(), new CourseInput("CS1", "Changed", "Changed", 1)));
+    assertEquals("Capacity cannot be lower than current enrollment.", error.getMessage());
     assertEquals("Algorithms", service.course(c.id()).name());
     assertEquals(20, service.course(c.id()).capacity());
   }
@@ -160,5 +164,18 @@ class ManagementIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.totalElements").value(1))
         .andExpect(jsonPath("$.content[0].name").value("Ada"));
+  }
+
+  @Test
+  void rejectsFractionalCapacityWithoutCreatingACourse() throws Exception {
+    mvc.perform(
+            post("/api/courses")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"code":"CS1","name":"Algorithms","description":"","capacity":1.5}
+                    """))
+        .andExpect(status().isBadRequest());
+    assertEquals(0, courses.count());
   }
 }

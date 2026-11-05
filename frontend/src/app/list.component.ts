@@ -2,7 +2,6 @@ import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
-  BehaviorSubject,
   catchError,
   debounceTime,
   distinctUntilChanged,

@@ -82,7 +82,15 @@ export class WorkspaceService {
     )
       return;
     tab.form.markAsPristine();
-    const active = this.router.url === `/${tab.key}`;
+    const active = this.router.isActive(
+      this.router.createUrlTree(['/', tab.kind, tab.id ?? 'new']),
+      {
+        paths: 'exact',
+        queryParams: 'ignored',
+        fragment: 'ignored',
+        matrixParams: 'ignored',
+      },
+    );
     this.tabs.update((t) => t.filter((x) => x !== tab));
     if (active) await this.router.navigate(['/', tab.kind]);
   }

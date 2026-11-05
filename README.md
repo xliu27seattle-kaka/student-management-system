@@ -27,7 +27,7 @@ These original computer science courses are seeded once, each with **20 seats**.
 | --------------- | ----------------------------------------------------------------------------- |
 | Backend         | Java 21, Spring Boot 3.5.16, Spring MVC, Bean Validation, Maven Wrapper       |
 | Persistence     | Spring Data JPA, **Hibernate ORM**, H2 file database, Flyway SQL migrations   |
-| Frontend        | Angular 22, TypeScript, Reactive Forms, RxJS                                  |
+| Frontend        | Angular 22, strict TypeScript/templates, Reactive Forms, RxJS                 |
 | UI              | Bootstrap 5.3.8, ng-bootstrap 21                                              |
 | External HTTP   | Spring `RestTemplate` calls Open-Meteo weather and city search APIs           |
 | Tests           | JUnit 5, Mockito, MockMvc, Vitest, **Playwright / Chromium end-to-end tests** |
@@ -84,30 +84,30 @@ Run from the repository root, where `compose.yaml` is located. Docker builds Jav
 
 ```bash
 # Build and start both services in the background
-docker compose up --build -d
+docker compose up --build -d --wait
 
 # Check containers and follow startup logs
 docker compose ps
 docker compose logs -f
 ```
 
-Open **http://localhost:4200**. The backend is available at **http://localhost:8080/api/courses**. Wait for Spring to finish starting before using the app. Ctrl+C exits log streaming; containers continue running.
+Open **http://localhost:4200**. The backend is available at **http://localhost:8080/api/courses**. Compose waits for the backend health check before starting the frontend; `--wait` waits until both services are healthy. Ctrl+C exits log streaming; containers continue running.
 
 ```bash
 # Stop and remove containers; retain database data
 docker compose down
 
 # Start again using existing images and retained data
-docker compose up -d
+docker compose up -d --wait
 ```
 
 H2 data persists in the `student-data` named volume. To intentionally erase all application data and reset the seeded courses, use `docker compose down -v`, then start again. On macOS/Windows, quit Docker Desktop after stopping the application if you also want to stop Docker itself. Command reference: [Docker Compose quickstart](https://docs.docker.com/compose/gettingstarted/).
 
 ## Playwright end-to-end tests
 
-The tests in [`frontend/e2e/workspace.spec.ts`](frontend/e2e/workspace.spec.ts) drive the Angular UI in Chromium against the **real Spring backend and H2 database**. Coverage includes CRUD, form validation, enrollment/withdrawal, work-tab drafts, confirmation dialogs, search/sort/pagination, weather, browser location, and mobile layout. API assertions also verify conflicts and deletion behavior.
+The tests in [`frontend/e2e/workspace.spec.ts`](frontend/e2e/workspace.spec.ts) drive the Angular UI in Chromium against the **real Spring backend and H2 database**. Coverage includes CRUD, form validation, enrollment/withdrawal, work-tab drafts, confirmation dialogs, invalid record URLs, search/sort/pagination, weather, browser location, and mobile layout. API assertions also verify conflicts and deletion behavior.
 
-This developer test path requires **Java 21 and Node.js 22.12+ (22.x)** locally:
+This developer test path requires **Java 21 and Node.js 22.22.3+ (22.x)** locally:
 
 ```bash
 # From the repository root: build and test the backend
@@ -118,6 +118,7 @@ cd backend
 cd ../frontend
 npm ci
 npx playwright install chromium
+npm run typecheck:e2e
 npm run test:e2e
 ```
 

@@ -272,3 +272,82 @@ test('UI displays duplicate email and capacity conflict errors from the backend'
     await request.delete(`/api/students/${second.id}`);
   }
 });
+
+test('closing a dirty record with URL query parameters and a fragment leaves the editor', async ({
+  page,
+  request,
+}) => {
+  const student = await (
+    await request.post('/api/students', {
+      data: { name: 'Query parameter student', email: `query${Date.now()}@example.com` },
+    })
+  ).json();
+  try {
+    await page.goto(`/students/${student.id}?source=review#details`);
+    await page.getByLabel('Full name').fill('Unsaved query draft');
+    await page.getByRole('button', { name: 'Close tab', exact: true }).click();
+    await page.getByRole('button', { name: 'Discard changes', exact: true }).click();
+    await expect(page).toHaveURL(/\/students$/);
+    await expect(page.getByRole('heading', { name: 'Students', exact: true })).toBeVisible();
+    expect((await (await request.get(`/api/students/${student.id}`)).json()).name).toBe(
+      'Query parameter student',
+    );
+  } finally {
+    await request.delete(`/api/students/${student.id}`);
+  }
+});
+
+test('invalid record IDs return to the directory without creating a broken work tab', async ({
+  page,
+}) => {
+  for (const [path, heading] of [
+    ['/students/not-an-id', 'Students'],
+    ['/courses/0', 'Courses'],
+    ['/students/9007199254740992', 'Students'],
+  ]) {
+    await page.goto(path);
+    await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Open work tabs' })).toHaveCount(0);
+  }
+});
+
+test('a manual city choice wins over an earlier pending browser location request', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'geolocation', {
+      value: {
+        getCurrentPosition: (success: PositionCallback) => {
+          (window as unknown as { finishLocation: () => void }).finishLocation = () =>
+            success({ coords: { latitude: 38.9, longitude: -77.0 } } as GeolocationPosition);
+        },
+      },
+    });
+  });
+  await page.route('**/api/weather/cities?**', (r) =>
+    r.fulfill({
+      json: [
+        {
+          name: 'Seattle',
+          region: 'Washington',
+          country: 'United States',
+          latitude: 47.61,
+          longitude: -122.33,
+        },
+      ],
+    }),
+  );
+  await page.goto('/students');
+  await page.getByRole('button', { name: 'Change location' }).click();
+  await page.getByRole('button', { name: 'Use my location' }).click();
+  await expect(page.getByRole('button', { name: 'Locating…' })).toBeVisible();
+  await page.getByRole('textbox', { name: 'City name' }).fill('Seattle');
+  await page.getByRole('button', { name: 'Search', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Seattle, Washington, United States', exact: true })
+    .click();
+  await page.evaluate(() => (window as unknown as { finishLocation: () => void }).finishLocation());
+  await expect(
+    page.getByRole('heading', { name: 'Seattle, Washington', exact: true }),
+  ).toBeVisible();
+});

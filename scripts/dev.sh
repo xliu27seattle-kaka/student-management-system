@@ -10,7 +10,7 @@ if [[ -d .tools/node-v22.23.4-darwin-arm64/bin ]]; then
   export PATH="$PWD/.tools/node-v22.23.4-darwin-arm64/bin:$PATH"
 fi
 command -v java >/dev/null || { echo 'Java 21 is required.' >&2; exit 1; }
-command -v npm >/dev/null || { echo 'Node 22.12+ and npm are required.' >&2; exit 1; }
+command -v npm >/dev/null || { echo 'Node 22.22.3+ and npm are required.' >&2; exit 1; }
 [[ -d frontend/node_modules ]] || (cd frontend && npm ci)
 if [[ -d .tools/m2 ]]; then
   export MAVEN_OPTS="${MAVEN_OPTS:-} -Dmaven.repo.local=$PWD/.tools/m2"

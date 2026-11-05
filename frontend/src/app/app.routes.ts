@@ -1,8 +1,15 @@
 import { inject } from '@angular/core';
-import { CanDeactivateFn, Routes } from '@angular/router';
+import { CanActivateFn, CanDeactivateFn, Router, Routes } from '@angular/router';
 import { EditorComponent } from './editor.component';
 import { ListComponent } from './list.component';
 import { ConfirmService } from './confirm.service';
+
+const validRecord: CanActivateFn = (route) => {
+  const token = route.paramMap.get('id') ?? '';
+  if (token === 'new' || (/^[1-9]\d*$/.test(token) && Number.isSafeInteger(Number(token))))
+    return true;
+  return inject(Router).createUrlTree(['/', route.data['kind']]);
+};
 
 const leaveEditor: CanDeactivateFn<EditorComponent> = (component, _route, _state, next) => {
   if (component.saving()) return false;
@@ -34,6 +41,7 @@ export const routes: Routes = [
     path: 'students/:id',
     component: EditorComponent,
     data: { kind: 'students' },
+    canActivate: [validRecord],
     canDeactivate: [leaveEditor],
     title: 'Student workspace | Campus',
   },
@@ -41,6 +49,7 @@ export const routes: Routes = [
     path: 'courses/:id',
     component: EditorComponent,
     data: { kind: 'courses' },
+    canActivate: [validRecord],
     canDeactivate: [leaveEditor],
     title: 'Course workspace | Campus',
   },

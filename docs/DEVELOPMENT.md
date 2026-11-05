@@ -6,7 +6,7 @@ A focused Java 21 / Spring Boot / Angular application for managing students, cou
 
 ## Run locally
 
-Prerequisites: **Java 21**, **Node.js 22.12+ (22.x)**, npm, and an internet connection for the first dependency installation. Maven is downloaded by the checked-in Maven Wrapper; a global Maven installation is unnecessary.
+Prerequisites: **Java 21**, **Node.js 22.22.3+ (22.x)**, npm, and an internet connection for the first dependency installation. Maven is downloaded by the checked-in Maven Wrapper; a global Maven installation is unnecessary.
 
 ```bash
 # Terminal 1
@@ -79,6 +79,7 @@ npm run build
 # Real Chromium against the real Spring API
 # Requires the backend JAR produced by ./mvnw verify above.
 npx playwright install chromium
+npm run typecheck:e2e
 npm run test:e2e
 ```
 

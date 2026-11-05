@@ -2,7 +2,7 @@ import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize } from 'rxjs';
+import { finalize, Subscription } from 'rxjs';
 import { ApiService, errorMessage } from './api.service';
 import { Course, EntityKind, Student } from './models';
 import { WorkTab, WorkspaceService } from './workspace.service';
@@ -55,6 +55,7 @@ import { EnrollmentsComponent } from './enrollments.component';
                 ><input
                   class="form-control"
                   id="record-name"
+                  aria-required="true"
                   formControlName="name"
                   maxlength="100"
                   [class.is-invalid]="invalid('name')"
@@ -72,6 +73,7 @@ import { EnrollmentsComponent } from './enrollments.component';
                   ><input
                     class="form-control"
                     id="record-email"
+                    aria-required="true"
                     type="email"
                     formControlName="email"
                     maxlength="254"
@@ -88,6 +90,7 @@ import { EnrollmentsComponent } from './enrollments.component';
                   ><input
                     class="form-control"
                     id="record-code"
+                    aria-required="true"
                     formControlName="code"
                     maxlength="20"
                     [class.is-invalid]="invalid('code')"
@@ -104,6 +107,7 @@ import { EnrollmentsComponent } from './enrollments.component';
                   ><input
                     class="form-control"
                     id="record-capacity"
+                    aria-required="true"
                     type="number"
                     min="1"
                     max="100000"
@@ -170,6 +174,7 @@ export class EditorComponent implements OnInit {
   private router = inject(Router);
   private destroy = inject(DestroyRef);
   tab!: WorkTab;
+  private detailRequest?: Subscription;
   error = signal('');
   notice = signal('');
   loading = signal(false);
@@ -179,6 +184,8 @@ export class EditorComponent implements OnInit {
   }
   ngOnInit() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe((params) => {
+      this.detailRequest?.unsubscribe();
+      this.loading.set(false);
       const kind = this.route.snapshot.data['kind'] as EntityKind;
       const token = params.get('id')!;
       this.error.set('');
@@ -190,9 +197,10 @@ export class EditorComponent implements OnInit {
   load() {
     const tab = this.tab;
     if (tab.id === null) return;
+    this.detailRequest?.unsubscribe();
     this.loading.set(true);
     this.error.set('');
-    this.api
+    this.detailRequest = this.api
       .get<Student | Course>(tab.kind, tab.id)
       .pipe(takeUntilDestroyed(this.destroy))
       .subscribe({
