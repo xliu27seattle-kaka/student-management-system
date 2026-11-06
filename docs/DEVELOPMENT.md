@@ -6,7 +6,23 @@ A focused Java 21 / Spring Boot / Angular application for managing students, cou
 
 ## Run locally
 
-Prerequisites: **Java 21**, **Node.js 22.22.3+ (22.x)**, npm, and an internet connection for the first dependency installation. Maven is downloaded by the checked-in Maven Wrapper; a global Maven installation is unnecessary.
+Prerequisites: **JDK 21**, **Node.js 22.22.3+ (22.x)** with npm/npx, and an internet connection for the first dependency installation. These are standard installations on the reviewer's computer; no files under an ignored development-tools directory are required.
+
+1. Install Node.js using the [official downloads](https://nodejs.org/en/download/). Select the **22.x** release line, version **22.22.3 or newer**, and your OS/architecture. The installer includes npm and npx.
+2. Install [Temurin JDK 21](https://adoptium.net/temurin/releases/?version=21&package=jdk), following the [installation guide for your OS](https://adoptium.net/installation/).
+3. Complete the installers' PATH setup. If multiple JDKs are installed, select JDK 21 and ensure `JAVA_HOME`, when set, points to that JDK.
+4. Open a new terminal or restart your IDE, then verify:
+
+```bash
+java -version
+node --version
+npm --version
+npx --version
+```
+
+Java should report 21, Node should report a supported 22.x version, and npm/npx should report version 10 or newer. Maven is downloaded by the checked-in Maven Wrapper; Angular CLI and Playwright are project dependencies. None needs a global installation.
+
+Clone or download the repository into any directory, then run the commands below from the repository root (containing `compose.yaml`, `backend/`, and `frontend/`).
 
 ```bash
 # Terminal 1
@@ -29,7 +45,17 @@ Alternatively, from the repository root:
 ./scripts/dev.sh
 ```
 
-The helper starts both services and stops them on Ctrl+C. It also recognizes the ignored workspace-local tools installed during development. Standard Java/Node installations on PATH work for a fresh checkout.
+The Bash helper uses your installed Java/Node/npm commands from PATH, starts both services, and stops them on Ctrl+C. It does not select a private tool installation or override `JAVA_HOME`. On Windows PowerShell, use the two-terminal commands above with `.\mvnw.cmd spring-boot:run` for the backend.
+
+### Setup troubleshooting
+
+- **`npm`, `npx`, or `node` not found:** install the supported Node.js 22.x release using the official installer or a Node version manager, then open a new terminal. Follow [npm's platform setup guide](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/). With a version manager, activate the project's supported Node 22.x version in that terminal.
+- **Commands work in a terminal but not the IDE:** fully restart the IDE so its integrated terminals inherit the updated PATH.
+- **Wrong Java version:** follow the JDK installer's instructions to select JDK 21 and update `JAVA_HOME` if it is set.
+- **`docker` not found:** finish Docker Desktop/Engine's CLI setup for your platform and reopen the terminal. On macOS, use Docker Desktop's Settings → Advanced → CLI tools installation.
+- **Compose cannot find a configuration file:** run it from the repository root where `compose.yaml` is located.
+
+No setup step depends on a particular username, checkout location, CPU architecture, or repository-local tool cache.
 
 ### Docker alternative
 

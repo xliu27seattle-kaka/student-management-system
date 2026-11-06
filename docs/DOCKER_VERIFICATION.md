@@ -24,7 +24,7 @@ The first persistence-driver attempt reused an HTTP socket after its container h
 
 ## Reproduce
 
-Docker Desktop / Engine must be running. The browser tests also need Node 22.22.3+ (22.x) locally. They use a **disposable** project called `student-management-verify`; the persistence script deliberately removes that project's data volume. Do not substitute an existing application volume.
+Docker Desktop / Engine must be running. The browser tests also need Node 22.22.3+ (22.x) with npm/npx installed locally; follow the [standard installation instructions](DEVELOPMENT.md#run-locally) and check `node --version`, `npm --version`, and `npx --version` before continuing. Local Java is not needed for this Docker-targeted test path. They use a **disposable** project called `student-management-verify`; the persistence script deliberately removes that project's data volume. Do not substitute an existing application volume.
 
 Stop the normal application first to free ports 4200 and 8080; `down` retains its data:
 

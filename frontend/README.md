@@ -2,6 +2,8 @@
 
 See the [repository README](../README.md) for setup, architecture, API, and verification instructions.
 
+Prerequisite: install Node.js **22.22.3+ within 22.x**, with npm/npx, using the [standard setup instructions](../docs/DEVELOPMENT.md#run-locally). Check `node --version`, `npm --version`, and `npx --version` in a new terminal. Run the commands below from `frontend/`.
+
 ```bash
 npm ci
 npm start        # localhost:4200; proxies /api to localhost:8080

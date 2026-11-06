@@ -1,20 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-# Workspace-local tools are optional; normal installations on PATH work as well.
-if [[ -d .tools/jdk-21.0.13+9/Contents/Home ]]; then
-  export JAVA_HOME="$PWD/.tools/jdk-21.0.13+9/Contents/Home"
-  export PATH="$JAVA_HOME/bin:$PATH"
-fi
-if [[ -d .tools/node-v22.23.4-darwin-arm64/bin ]]; then
-  export PATH="$PWD/.tools/node-v22.23.4-darwin-arm64/bin:$PATH"
-fi
-command -v java >/dev/null || { echo 'Java 21 is required.' >&2; exit 1; }
-command -v npm >/dev/null || { echo 'Node 22.22.3+ and npm are required.' >&2; exit 1; }
+# Use the caller's standard tool installation; do not override JAVA_HOME or PATH.
+command -v java >/dev/null || { echo 'JDK 21 is required. See docs/DEVELOPMENT.md.' >&2; exit 1; }
+command -v node >/dev/null || { echo 'Node.js 22.22.3+ (22.x) is required. See docs/DEVELOPMENT.md.' >&2; exit 1; }
+command -v npm >/dev/null || { echo 'npm is required and is included with Node.js. See docs/DEVELOPMENT.md.' >&2; exit 1; }
 [[ -d frontend/node_modules ]] || (cd frontend && npm ci)
-if [[ -d .tools/m2 ]]; then
-  export MAVEN_OPTS="${MAVEN_OPTS:-} -Dmaven.repo.local=$PWD/.tools/m2"
-fi
 (cd backend && exec ./mvnw -B -ntp spring-boot:run) &
 backend_pid=$!
 (cd frontend && exec npm start) &

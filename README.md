@@ -62,6 +62,17 @@ Flyway creates and versions the schema; Hibernate validates the entity mappings 
 
 The association table supports both “a student's courses” and “a course's students.” IDs are database-generated. Transactions and course row locks prevent overbooking. Flyway also maintains its own `flyway_schema_history` metadata table.
 
+## Get the project
+
+Clone the repository into any directory you choose:
+
+```bash
+git clone https://github.com/xliu27seattle-kaka/student-management-system.git
+cd student-management-system
+```
+
+All commands below assume this repository root: the directory containing `compose.yaml`, `backend/`, and `frontend/`. If you download a ZIP instead, extract it and open a terminal in that folder.
+
 ## Choose a startup path
 
 - **Docker:** follow the installation and startup instructions below. This builds Java, Angular, and H2 inside containers.
@@ -79,7 +90,7 @@ For macOS:
 
 For other systems, follow the official [Windows installation](https://docs.docker.com/desktop/setup/install/windows-install/) or [Linux Engine installation](https://docs.docker.com/engine/install/) and [Compose plugin installation](https://docs.docker.com/compose/install/linux/) instructions.
 
-If `docker` is not found on this Mac, add Docker Desktop's CLI directory to your current terminal: `export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"`.
+If `docker` is not found, complete the CLI setup for your operating system and reopen the terminal. On macOS, Docker Desktop's [Settings → Advanced → CLI tools installation](https://docs.docker.com/desktop/settings-and-maintenance/settings/#advanced-mac-only) can configure the command. No repository-specific PATH entry is needed.
 
 Verify installation:
 
@@ -114,13 +125,34 @@ docker compose up -d --wait
 
 H2 data persists in the `student-data` named volume. To intentionally erase all application data and reset the seeded courses, use `docker compose down -v`, then start again. On macOS/Windows, quit Docker Desktop after stopping the application if you also want to stop Docker itself. Command reference: [Docker Compose quickstart](https://docs.docker.com/compose/gettingstarted/).
 
+## Local prerequisites for development and tests
+
+| Task                                       | Install on your computer                               |
+| ------------------------------------------ | ------------------------------------------------------ |
+| Run the application with Docker            | Docker Desktop, or Docker Engine with Compose          |
+| Develop locally or run local-backend tests | JDK 21 and Node.js 22.22.3+ (22.x), including npm/npx  |
+| Run browser tests against Docker           | Docker plus Node.js 22.22.3+ (22.x), including npm/npx |
+
+For local development/tests, install **Node.js 22.x** for your operating system from the [official Node.js download page](https://nodejs.org/en/download/), selecting version 22.22.3 or newer within 22.x. Use its installer with npm included; npm and npx do not need separate installations. Install **JDK 21** using the [Temurin downloads](https://adoptium.net/temurin/releases/?version=21&package=jdk) and [platform installation guide](https://adoptium.net/installation/).
+
+Open a new terminal (restart your IDE if using its integrated terminal), then check:
+
+```bash
+java -version
+node --version
+npm --version
+npx --version
+```
+
+Expect Java 21, Node 22.22.3+ within 22.x, and npm/npx 10 or newer. If a command is missing, complete the installer's PATH setup for your OS; see [local setup troubleshooting](docs/DEVELOPMENT.md#setup-troubleshooting). Maven, Angular CLI, and Playwright are provided by the repository's wrapper/dependencies and do not need global installations.
+
 ## Playwright end-to-end tests
 
 For the production Docker stack, follow [the isolated Docker verification workflow](docs/DOCKER_VERIFICATION.md#reproduce). It runs `npm run test:e2e:docker` and checks persistence across container recreation and volume reset. Use the disposable verification project rather than an existing data volume.
 
 The tests in [`frontend/e2e/workspace.spec.ts`](frontend/e2e/workspace.spec.ts) drive the Angular UI in Chromium against the **real Spring backend and H2 database**. Coverage includes CRUD, form validation, enrollment/withdrawal, work-tab drafts, confirmation dialogs, invalid record URLs, search/sort/pagination, weather, browser location, and mobile layout. API assertions also verify conflicts and deletion behavior.
 
-This developer test path requires **Java 21 and Node.js 22.22.3+ (22.x)** locally:
+After installing and checking the local prerequisites above, run:
 
 ```bash
 # From the repository root: build and test the backend
