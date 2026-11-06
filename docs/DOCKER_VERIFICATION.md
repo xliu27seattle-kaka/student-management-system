@@ -58,3 +58,5 @@ The GitHub Actions Docker job now repeats the build, Docker-targeted browser sui
 ## CTO evidence re-review
 
 The independent CTO review agent inspected the build/browser/persistence logs, driver, Docker Playwright configuration, and CI/documentation changes. Its final decision was **Approve: the former local Docker evidence gap is closed**, with no blocking defect and unconditional implementation/local-runtime approval for the agreed scope. This was evidence and source review, not a claim that the reviewer personally executed Docker. Publication and hosted CI remain separate outstanding delivery checks.
+
+The other roles' earlier code/submission reviews are available separately: [Technical Recruiter](reviews/TECHNICAL_RECRUITER.md), [Senior Developer](reviews/SENIOR_DEVELOPER.md), and [Senior Architect](reviews/SENIOR_ARCHITECT.md). They did not perform this later Docker-specific re-review.

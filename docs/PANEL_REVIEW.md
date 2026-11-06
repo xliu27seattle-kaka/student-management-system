@@ -4,6 +4,14 @@ Reviewed on November 5, 2026. Four separate review agents inspected the submissi
 
 Initial source baseline: `58f33f6`. Final reviews inspected the working-tree corrections relative to that baseline, including the source, tests, documentation, and screenshots committed alongside this report. No reviewer was required to return a positive vote.
 
+## Individual reviewer reports
+
+- [Technical Recruiter: findings, corrections, final vote, and review limits](reviews/TECHNICAL_RECRUITER.md)
+- [Senior Software Developer: independent test runs, findings, and final vote](reviews/SENIOR_DEVELOPER.md)
+- [Senior Architect: architectural assessment, findings, and final vote](reviews/SENIOR_ARCHITECT.md)
+
+These reports record each agent's actual earlier review. **Only the CTO performed the later Docker-specific evidence re-review.** The other three agents' approvals concern the corrected code/submission, not an independently executed Docker run.
+
 ## Subsequent Docker verification
 
 After the panel review, Docker was installed and the implementation agent completed actual local container builds, health checks, all **11 Docker-targeted browser tests**, and recreation/persistence/volume-reset checks. This closes the local Docker evidence gap described in the original review. See [Docker verification](DOCKER_VERIFICATION.md) for results and reproduction commands. The CTO independently inspected the new evidence and corrections and explicitly confirmed **Approve: the local Docker evidence gap is closed**. Its implementation/local-runtime approval is unconditional for the agreed scope. The original reviewer votes below are retained accurately; no hosted CI success or public source delivery is implied.
