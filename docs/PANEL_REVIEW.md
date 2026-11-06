@@ -4,6 +4,10 @@ Reviewed on November 5, 2026. Four separate review agents inspected the submissi
 
 Initial source baseline: `58f33f6`. Final reviews inspected the working-tree corrections relative to that baseline, including the source, tests, documentation, and screenshots committed alongside this report. No reviewer was required to return a positive vote.
 
+## Subsequent Docker verification
+
+After the panel review, Docker was installed and the implementation agent completed actual local container builds, health checks, all **11 Docker-targeted browser tests**, and recreation/persistence/volume-reset checks. This closes the local Docker evidence gap described in the original review. See [Docker verification](DOCKER_VERIFICATION.md) for results and reproduction commands. The CTO independently inspected the new evidence and corrections and explicitly confirmed **Approve: the local Docker evidence gap is closed**. Its implementation/local-runtime approval is unconditional for the agreed scope. The original reviewer votes below are retained accurately; no hosted CI success or public source delivery is implied.
+
 ## Votes
 
 | Role / review agent                            | Initial vote                | Final vote                                                       | Scope of final approval                                                                                                                  |
@@ -23,7 +27,7 @@ These are approvals of the reviewed code and local submission quality. They do n
 | Missing regression for navigation while a create response is pending | Developer                 | Added a Playwright case that delays an actual create response, attempts work-tab and directory navigation, then releases the response and checks the new record URL, form, and controls. | Passed. The initially suspected navigation defect was independently investigated and **disproved**; the existing guard worked. This was a coverage improvement, not a claimed bug fix.                                                               |
 | Local startup alternative was too easy to miss                       | Recruiter                 | Added a prominent startup-path choice with a direct link to local Java/Node instructions, alongside the Docker path and its verification limit.                                          | Recruiter re-read the README and marked the finding resolved.                                                                                                                                                                                        |
 | Screenshots captured loading weather and omitted editor/work tabs    | Recruiter                 | Refreshed desktop/mobile images after real weather completed; added a student editor screenshot showing two tabs and an enrollment.                                                      | Recruiter inspected all three images and marked the finding resolved. Temporary screenshot data was deleted afterward.                                                                                                                               |
-| Missing executed Docker evidence                                     | CTO, Architect, Recruiter | Retained explicit limitation; supplied Docker health checks and a CI smoke job without claiming it has run.                                                                              | **Open delivery check**, not an identified application defect. Full container build/startup and persistence still require an engine or successful hosted CI.                                                                                         |
+| Missing executed Docker evidence                                     | CTO, Architect, Recruiter | Retained explicit limitation; supplied Docker health checks and a CI smoke job without claiming it has run.                                                                              | **Closed by subsequent local Docker execution.** Build, startup, 11 browser tests and persistence/reset checks passed; see the Docker verification report.                                                                                           |
 
 ## Evidence and reviewer independence
 
@@ -46,7 +50,7 @@ The final reviewers inspected the correction and these fresh logs. They did not 
 ## Delivery conditions still open
 
 1. **Commit and push the reviewed revision, then confirm it is publicly available.** The repository exists publicly, but the reviewed metadata reported `size: 0`; existence is not evidence that these commits have been uploaded. Git pushes have been blocked by missing machine credentials.
-2. **Execute Docker build/startup and restart-persistence verification.** Compose schema validation and architecture metadata checks passed, but no Docker Engine is available locally. The supplied CI smoke job has not been observed running.
+2. **Docker build/startup and restart persistence: completed locally.** The subsequent Docker verification closes this evidence gap. Hosted CI remains separate.
 3. **Observe hosted CI results after publication.** Local passing results are not a claim that GitHub Actions is green.
 
 The CTO specifically separated code readiness from these delivery checks. The other reviewers likewise treated authentication and unavailable Docker as delivery limitations rather than inventing code defects or rejecting the agreed small-project architecture.

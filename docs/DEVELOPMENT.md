@@ -85,7 +85,7 @@ npm run test:e2e
 
 Playwright starts its own servers on **8081 / 4201**, uses a fresh **in-memory H2 database**, and shuts them down afterward. It does not touch the normal file database. Weather responses are stubbed in browser tests for reproducibility; backend weather tests use an HTTP mock. Backend tests verify two simultaneous requests cannot take the same final seat. GitHub Actions runs the same checks and uploads browser traces on failure.
 
-See [review and verification notes](REVIEW.md) for coverage and review outcomes. Docker definitions are provided but require a Docker environment for validation.
+See [review and verification notes](REVIEW.md) for coverage and review outcomes. Docker builds, browser workflows, and persistence/reset checks have now been executed successfully; see [Docker verification](DOCKER_VERIFICATION.md).
 
 ## Implementation
 

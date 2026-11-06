@@ -67,7 +67,7 @@ The association table supports both “a student's courses” and “a course's 
 - **Docker:** follow the installation and startup instructions below. This builds Java, Angular, and H2 inside containers.
 - **Local Java / Node:** follow [Run locally](docs/DEVELOPMENT.md#run-locally) using Java 21 and Node 22.22.3+ (22.x). This path has been exercised locally.
 
-Docker schema validation passed; a full container build still requires Docker Engine and has not been executed in this environment.
+Both startup paths have been verified. See [Docker verification results](docs/DOCKER_VERIFICATION.md) for container build, browser, persistence, and reset checks.
 
 ## Install Docker
 
@@ -75,11 +75,13 @@ For macOS:
 
 1. Download [Docker Desktop for Mac](https://docs.docker.com/desktop/setup/install/mac-install/), choosing **Apple silicon** or **Intel** for your Mac.
 2. Open `Docker.dmg`, drag Docker to Applications, then launch Docker Desktop.
-3. Complete its first-run setup and wait until the Docker engine is running. Docker Desktop includes Docker Compose.
+3. Complete its first-run setup and wait until the Docker engine is running. Docker Desktop includes Docker Compose. Open a new terminal afterward.
 
 For other systems, follow the official [Windows installation](https://docs.docker.com/desktop/setup/install/windows-install/) or [Linux Engine installation](https://docs.docker.com/engine/install/) and [Compose plugin installation](https://docs.docker.com/compose/install/linux/) instructions.
 
-Open a terminal and verify installation:
+If `docker` is not found on this Mac, add Docker Desktop's CLI directory to your current terminal: `export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"`.
+
+Verify installation:
 
 ```bash
 docker --version
@@ -114,6 +116,8 @@ H2 data persists in the `student-data` named volume. To intentionally erase all 
 
 ## Playwright end-to-end tests
 
+For the production Docker stack, follow [the isolated Docker verification workflow](docs/DOCKER_VERIFICATION.md#reproduce). It runs `npm run test:e2e:docker` and checks persistence across container recreation and volume reset. Use the disposable verification project rather than an existing data volume.
+
 The tests in [`frontend/e2e/workspace.spec.ts`](frontend/e2e/workspace.spec.ts) drive the Angular UI in Chromium against the **real Spring backend and H2 database**. Coverage includes CRUD, form validation, enrollment/withdrawal, work-tab drafts, confirmation dialogs, invalid record URLs, search/sort/pagination, weather, browser location, and mobile layout. API assertions also verify conflicts and deletion behavior.
 
 This developer test path requires **Java 21 and Node.js 22.22.3+ (22.x)** locally:
@@ -135,4 +139,4 @@ On Windows PowerShell, use `.\mvnw.cmd verify` in place of `./mvnw verify`.
 
 Playwright automatically starts and stops isolated servers on **4201 / 8081** with a fresh **in-memory database**. It does not use the Docker deployment or modify its data. Weather responses are stubbed for reproducibility; the application's CRUD requests use the real backend. Failed tests save screenshots and traces under `frontend/test-results/`.
 
-For non-Docker development, backend/frontend unit tests, and the full REST reference, see [development instructions](docs/DEVELOPMENT.md). See [verification notes](docs/REVIEW.md) and the [independent agent panel review](docs/PANEL_REVIEW.md) for executed checks, actual review votes, and remaining delivery conditions. Docker configuration is provided; container builds have not been verified in this environment.
+For non-Docker development, backend/frontend unit tests, and the full REST reference, see [development instructions](docs/DEVELOPMENT.md). See [verification notes](docs/REVIEW.md) and the [independent agent panel review](docs/PANEL_REVIEW.md) for executed checks, actual review votes, and remaining delivery conditions. Docker builds, 11 container-targeted browser tests, and persistence/reset checks have also passed; see [Docker verification](docs/DOCKER_VERIFICATION.md).
