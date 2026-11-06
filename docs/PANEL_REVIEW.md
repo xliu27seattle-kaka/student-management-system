@@ -1,5 +1,7 @@
 # Independent agent panel review
 
+> Current delivery status: the repository has been published and hosted CI results have now been inspected. See [CI verification](CI_VERIFICATION.md) for the browser-install failure and environment correction. Earlier review statements below describe their original review dates.
+
 Reviewed on November 5, 2026. Four separate review agents inspected the submission, returned their own findings and votes, then re-reviewed the corrections. They represent the requested hiring-panel roles; they are **not human employees or an actual employer's hiring committee**. The implementing agent coordinated corrections and recorded the results below.
 
 Initial source baseline: `58f33f6`. Final reviews inspected the working-tree corrections relative to that baseline, including the source, tests, documentation, and screenshots committed alongside this report. No reviewer was required to return a positive vote.

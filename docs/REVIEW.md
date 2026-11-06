@@ -1,5 +1,7 @@
 # Review, corrections, and verification
 
+> Current delivery status: the repository has been published and hosted CI results have now been inspected. See [CI verification](CI_VERIFICATION.md) for the browser-install failure and environment correction. Earlier review statements below describe their original review dates.
+
 This document records the implementing agent's self-review and executed verification. A subsequent panel of four separate review agents has now inspected the project, raised findings, and re-reviewed corrections. Their actual votes, evidence, and remaining delivery conditions are recorded in [Independent agent panel review](PANEL_REVIEW.md). Earlier unsupported simulated votes were removed and are not the basis for the panel results.
 
 ## Panel perspectives

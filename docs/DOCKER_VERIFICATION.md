@@ -1,5 +1,7 @@
 # Docker verification
 
+> Current delivery status: the repository has been published and hosted CI results have now been inspected. See [CI verification](CI_VERIFICATION.md) for the browser-install failure and environment correction. Earlier review statements below describe their original review dates.
+
 Executed locally on November 5, 2026 using Docker Engine **29.9.2**, Docker Compose **5.6.1**, and Linux **ARM64** containers on Docker Desktop. The backend runtime reports Temurin **Java 21.0.13+9**. The application was built from source and exercised through the production Nginx frontend, Spring backend, and file-backed H2 database.
 
 ## Results
