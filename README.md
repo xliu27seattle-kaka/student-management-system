@@ -2,10 +2,6 @@
 
 A full-stack take-home project for managing students, courses, and enrollments. It includes CRUD, searchable and sortable directories, pagination, editable work tabs, unsaved-change and deletion confirmations, form validation, and enrollment management. Weather defaults to **Washington, DC**, with manual city search and opt-in browser location showing **Current location**.
 
-![Course directory](docs/courses-desktop.png)
-
-![Student editor with open work tabs and an enrollment](docs/student-workspace.png)
-
 ## Courses
 
 These original computer science courses are seeded once, each with **20 seats**. Users can add, edit, and delete courses and change capacity. Duplicate enrollment is rejected; capacity cannot be reduced below current enrollment. Deleting a student or course removes its enrollments and preserves records on the other side.
@@ -76,9 +72,8 @@ All commands below assume this repository root: the directory containing `compos
 ## Choose a startup path
 
 - **Docker:** follow the installation and startup instructions below. This builds Java, Angular, and H2 inside containers.
-- **Local Java / Node:** follow [Run locally](docs/DEVELOPMENT.md#run-locally) using Java 21 and Node 22.22.3+ (22.x). This path has been exercised locally.
+- **Local Java / Node:** follow [Run locally](#run-locally) using Java 21 and Node 22.22.3+ (22.x). This path has been exercised locally.
 
-Both startup paths have been verified. See [Docker verification results](docs/DOCKER_VERIFICATION.md) for container build, browser, persistence, and reset checks.
 
 ## Install Docker
 
@@ -144,11 +139,28 @@ npm --version
 npx --version
 ```
 
-Expect Java 21, Node 22.22.3+ within 22.x, and npm/npx 10 or newer. If a command is missing, complete the installer's PATH setup for your OS; see [local setup troubleshooting](docs/DEVELOPMENT.md#setup-troubleshooting). Maven, Angular CLI, and Playwright are provided by the repository's wrapper/dependencies and do not need global installations.
+Expect Java 21, Node 22.22.3+ within 22.x, and npm/npx 10 or newer. If a command is missing, complete the installer's PATH setup for your OS and restart your terminal or IDE. If multiple JDKs are installed, select JDK 21 and ensure `JAVA_HOME`, when set, points to it. Maven, Angular CLI, and Playwright are provided by the repository's wrapper/dependencies and do not need global installations.
+
+## Run locally
+
+After installing the prerequisites above, open two terminals at the repository root:
+
+```bash
+# Terminal 1
+cd backend
+./mvnw spring-boot:run
+```
+
+```bash
+# Terminal 2
+cd frontend
+npm ci
+npm start
+```
+
+Open **http://localhost:4200**. The backend runs on **8080**; Angular proxies API requests to it. Stop both servers with Ctrl+C. On Windows PowerShell, use `.\mvnw.cmd spring-boot:run` for the backend. Local H2 data is stored under `backend/data/`, separately from the Docker volume.
 
 ## Playwright end-to-end tests
-
-For the production Docker stack, follow [the isolated Docker verification workflow](docs/DOCKER_VERIFICATION.md#reproduce). It runs `npm run test:e2e:docker` and checks persistence across container recreation and volume reset. Use the disposable verification project rather than an existing data volume.
 
 The tests in [`frontend/e2e/workspace.spec.ts`](frontend/e2e/workspace.spec.ts) drive the Angular UI in Chromium against the **real Spring backend and H2 database**. Coverage includes CRUD, form validation, enrollment/withdrawal, work-tab drafts, confirmation dialogs, invalid record URLs, search/sort/pagination, weather, browser location, and mobile layout. API assertions also verify conflicts and deletion behavior.
 
@@ -162,6 +174,8 @@ cd backend
 # Install frontend dependencies and Chromium, then run end-to-end tests
 cd ../frontend
 npm ci
+npm test
+npm run build
 npx playwright install chromium
 npm run typecheck:e2e
 npm run test:e2e
@@ -171,4 +185,35 @@ On Windows PowerShell, use `.\mvnw.cmd verify` in place of `./mvnw verify`.
 
 Playwright automatically starts and stops isolated servers on **4201 / 8081** with a fresh **in-memory database**. It does not use the Docker deployment or modify its data. Weather responses are stubbed for reproducibility; the application's CRUD requests use the real backend. Failed tests save screenshots and traces under `frontend/test-results/`.
 
-For non-Docker development, backend/frontend unit tests, and the full REST reference, see [development instructions](docs/DEVELOPMENT.md). See [verification notes](docs/REVIEW.md) and the [independent agent panel review](docs/PANEL_REVIEW.md) for executed checks, actual review votes, and remaining delivery conditions. Docker builds, 11 container-targeted browser tests, and persistence/reset checks have also passed; see [Docker verification](docs/DOCKER_VERIFICATION.md).
+On Linux, use `npx playwright install --with-deps chromium` to install Chromium and its system dependencies.
+
+### Test the Docker deployment
+
+Use a disposable project with fresh data for browser and persistence tests. Stop the normal stack first to free ports 4200 and 8080; its data is retained. These commands require Docker and the local Node.js prerequisites above, but no local Java installation.
+
+```bash
+# From the repository root
+docker compose down
+docker compose -p student-management-verify up --build -d --wait
+
+cd frontend
+npm ci
+npx playwright install chromium
+npm run typecheck:e2e
+npm run test:e2e:docker
+cd ..
+
+node scripts/verify-docker-persistence.mjs
+
+# Delete only the disposable test containers and data
+docker compose -p student-management-verify down -v
+
+# Resume the normal application with its retained data
+docker compose up -d --wait
+```
+
+The persistence script creates test records, checks that they survive container recreation, then removes the disposable volume and verifies clean course seeding. Docker browser tests save failure evidence under `frontend/test-results/docker/`.
+
+## Continuous integration
+
+[GitHub Actions](.github/workflows/ci.yml) runs backend verification, frontend unit tests, production builds, E2E type checks, and Playwright tests on pushes and pull requests. A separate job builds and tests the Docker stack and checks data persistence/reset. Browser tests use stubbed weather responses for reproducibility. The workflow does not deploy the application.

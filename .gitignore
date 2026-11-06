@@ -9,3 +9,6 @@ frontend/test-results/
 frontend/playwright-report/
 *.log
 .DS_Store
+
+# Local working notes and internal review evidence
+/docs/
